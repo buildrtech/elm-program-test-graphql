@@ -21,13 +21,13 @@ start =
 
 all : Test
 all =
-    describe "HomeAutomationExample"
+    describe "Graphql Requests"
         [ test "controlling a light" <|
             \() ->
                 start
                     |> ProgramTest.simulateHttpOk
                         "GET"
-                        "http://localhost:8003/lighting_service/v1/devices"
+                        "https://elm-graphql.herokuapp.com"
                         """[{"id":"K001", "name":"Kitchen", "dimmable":false, "value":0}]"""
                     |> ProgramTest.clickButton "Turn on"
                     |> ProgramTest.expectHttpRequest
@@ -43,15 +43,18 @@ simulateEffects effect =
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 
-        Main.GetDeviceList { url, onResult, decoder } ->
+        Main.GraphqlRequest ->
             SimulatedEffect.Http.get
-                { url = url
+                { url = "https://elm-graphql.herokuapp.com"
                 , expect = SimulatedEffect.Http.expectJson onResult decoder
                 }
 
-        Main.ChangeLight { url, onResult, decoder, body } ->
-            SimulatedEffect.Http.post
-                { url = url
-                , body = SimulatedEffect.Http.jsonBody body
-                , expect = SimulatedEffect.Http.expectJson onResult decoder
-                }
+
+
+--
+-- Main.ChangeLight { url, onResult, decoder, body } ->
+--     SimulatedEffect.Http.post
+--         { url = url
+--         , body = SimulatedEffect.Http.jsonBody body
+--         , expect = SimulatedEffect.Http.expectJson onResult decoder
+--         }
