@@ -1,7 +1,7 @@
 module MainTest exposing (all)
 
 import Expect
-import HomeAutomationExample as Main
+import Main
 import ProgramTest exposing (ProgramTest)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Http
@@ -22,17 +22,12 @@ start =
 all : Test
 all =
     describe "Graphql Requests"
-        [ test "controlling a light" <|
+        [ test "string request" <|
             \() ->
                 start
-                    |> ProgramTest.simulateHttpOk
-                        "GET"
-                        "https://elm-graphql.herokuapp.com"
-                        """[{"id":"K001", "name":"Kitchen", "dimmable":false, "value":0}]"""
-                    |> ProgramTest.clickButton "Turn on"
                     |> ProgramTest.expectHttpRequest
                         "POST"
-                        "http://localhost:8003/lighting_service/v1/devices/K001"
+                        "https://elm-graphql.herokuapp.com/graphql"
                         (.body >> Expect.equal """{"value":1}""")
         ]
 
@@ -43,10 +38,11 @@ simulateEffects effect =
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 
-        Main.GraphqlRequest ->
-            SimulatedEffect.Http.get
+        Main.GraphqlRequest _ ->
+            SimulatedEffect.Http.post
                 { url = "https://elm-graphql.herokuapp.com"
-                , expect = SimulatedEffect.Http.expectJson onResult decoder
+                , body = SimulatedEffect.Http.emptyBody
+                , expect = SimulatedEffect.Http.expectString Main.GotStringResponse
                 }
 
 
