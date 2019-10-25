@@ -54,7 +54,7 @@ main =
 
 init : Flags -> ( Model, Effect )
 init () =
-    ( initialModel, graphqlEffect Query.hello GotStringResponse )
+    ( initialModel, graphqlEffect Query.hello (\_ -> GotStringResponse <| Ok "") )
 
 
 type Effect
