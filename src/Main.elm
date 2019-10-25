@@ -22,11 +22,6 @@ type alias Model =
     ()
 
 
-type PostResult
-    = Waiting
-    | Failed Http.Error
-
-
 initialModel : Model
 initialModel =
     ()
@@ -54,12 +49,14 @@ main =
 
 init : Flags -> ( Model, Effect )
 init () =
-    ( initialModel, graphqlEffect Query.hello (\_ -> GotStringResponse <| Ok "") )
+    ( initialModel
+    , graphqlEffect Query.hello (\_ -> GotStringResponse <| Ok "")
+    )
 
 
 type Effect
     = NoEffect
-    | GraphqlRequest (Decode.Decoder Msg)
+    | GraphqlRequest (Decode.Decoder Msg) String
 
 
 graphqlEffect : SelectionSet decodesTo RootQuery -> (decodesTo -> Msg) -> Effect
@@ -69,6 +66,7 @@ graphqlEffect selectionSet toMsg =
             |> Graphql.Document.decoder
             |> Decode.map toMsg
         )
+        (Graphql.Document.serializeQuery selectionSet)
 
 
 
@@ -83,11 +81,6 @@ graphqlEffect selectionSet toMsg =
 --     , decoder : Json.Decode.Decoder Light
 --     , onResult : Result Http.Error Light -> Msg
 --     }
--- stringRequest : Cmd Msg
--- stringRequest =
---     Query.hello
---         |> Graphql.Http.queryRequest "https://elm-graphql.herokuapp.com"
---         |> Graphql.Http.send (RemoteData.fromResult >> GotStringResponse)
 
 
 perform : Effect -> Cmd Msg
@@ -96,8 +89,12 @@ perform effect =
         NoEffect ->
             Cmd.none
 
-        GraphqlRequest _ ->
-            Cmd.none
+        GraphqlRequest decoder query ->
+            Http.post
+                { url = "https://elm-graphql.herokuapp.com"
+                , body = Http.stringBody "application/json" query
+                , expect = Http.expectString GotStringResponse
+                }
 
 
 

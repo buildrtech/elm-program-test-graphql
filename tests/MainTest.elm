@@ -38,10 +38,10 @@ simulateEffects effect =
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 
-        Main.GraphqlRequest _ ->
+        Main.GraphqlRequest _ query ->
             SimulatedEffect.Http.post
-                { url = "https://elm-graphql.herokuapp.com"
-                , body = SimulatedEffect.Http.emptyBody
+                { url = "https://elm-graphql.herokuapp.com/graphql"
+                , body = SimulatedEffect.Http.stringBody "application/json" query
                 , expect = SimulatedEffect.Http.expectString Main.GotStringResponse
                 }
 
