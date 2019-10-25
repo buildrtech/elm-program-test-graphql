@@ -69,20 +69,6 @@ graphqlEffect selectionSet toMsg =
         (Graphql.Document.serializeQuery selectionSet)
 
 
-
--- | GetDeviceList
---     { url : String
---     , decoder : Json.Decode.Decoder (List Light)
---     , onResult : Result Http.Error (List Light) -> Msg
---     }
--- | ChangeLight
---     { url : String
---     , body : Json.Encode.Value
---     , decoder : Json.Decode.Decoder Light
---     , onResult : Result Http.Error Light -> Msg
---     }
-
-
 perform : Effect -> Cmd Msg
 perform effect =
     case effect of
@@ -98,18 +84,6 @@ perform effect =
 
 
 
--- GetDeviceList { url, onResult, decoder } ->
---     Http.get
---         { url = url
---         , expect = Http.expectJson onResult decoder
---         }
---
--- ChangeLight { url, onResult, decoder, body } ->
---     Http.post
---         { url = url
---         , body = Http.jsonBody body
---         , expect = Http.expectJson onResult decoder
---         }
 -- UPDATE
 
 
