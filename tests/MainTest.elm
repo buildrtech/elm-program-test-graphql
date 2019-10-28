@@ -30,6 +30,10 @@ all =
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql"
+                        """{ "data": { "today3832528868": "hi" }}"""
+                    |> ProgramTest.simulateHttpOk
+                        "POST"
+                        "https://elm-graphql.herokuapp.com/graphql"
                         """{ "data": { "hello3832528868": "hi" }}"""
                     |> ProgramTest.done
         ]

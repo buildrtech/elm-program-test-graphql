@@ -52,6 +52,9 @@ init () =
     ( initialModel
     , batch
         [ graphqlEffect Query.hello (\string -> GotStringResponse <| Ok string)
+        , graphqlEffect
+            (Query.today |> SelectionSet.map String.length)
+            (\int -> GotIntResponse <| Ok int)
         ]
     )
 
@@ -101,7 +104,8 @@ perform effect =
 
 
 type Msg
-    = GotStringResponse (Result Http.Error String)
+    = GotIntResponse (Result Http.Error Int)
+    | GotStringResponse (Result Http.Error String)
 
 
 
@@ -111,6 +115,9 @@ type Msg
 update : Msg -> Model -> ( Model, Effect )
 update msg model =
     case Debug.log "MSG" msg of
+        GotIntResponse response ->
+            ( model, NoEffect )
+
         GotStringResponse response ->
             ( model, NoEffect )
 
