@@ -83,7 +83,7 @@ graphqlEffect index selectionSet toMsg =
     in
     GraphqlRequest
         index
-        (decoderToResultToMsg decoder toMsg)
+        (buildResponseToMsg decoder toMsg)
         (Graphql.Document.serializeQuery selectionSet)
 
 
@@ -106,12 +106,12 @@ perform effect =
                 }
 
 
-decoderToResultToMsg :
+buildResponseToMsg :
     Decode.Decoder decodesTo
     -> (RemoteData Http.Error decodesTo -> msg)
     -> Result Http.Error String
     -> msg
-decoderToResultToMsg decoder toMsg response =
+buildResponseToMsg decoder toMsg response =
     response
         |> Result.andThen
             (\responseBody ->
