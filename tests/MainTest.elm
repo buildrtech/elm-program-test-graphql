@@ -25,10 +25,11 @@ all =
         [ test "string request" <|
             \() ->
                 start
-                    |> ProgramTest.expectHttpRequest
+                    |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql"
-                        (.body >> Expect.equal """{"value":1}""")
+                        "hi"
+                    |> ProgramTest.done
         ]
 
 
