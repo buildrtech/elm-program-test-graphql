@@ -108,9 +108,9 @@ perform effect =
 
 decoderToResultToMsg :
     Decode.Decoder decodesTo
-    -> (RemoteData Http.Error decodesTo -> Msg)
+    -> (RemoteData Http.Error decodesTo -> msg)
     -> Result Http.Error String
-    -> Msg
+    -> msg
 decoderToResultToMsg decoder toMsg response =
     response
         |> Result.andThen
