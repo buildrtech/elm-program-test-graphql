@@ -36,6 +36,11 @@ all =
 simulateEffects : Main.Effect -> ProgramTest.SimulatedEffect Main.Msg
 simulateEffects effect =
     case effect of
+        Main.Batch effects ->
+            effects
+                |> List.map simulateEffects
+                |> SimulatedEffect.Cmd.batch
+
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 

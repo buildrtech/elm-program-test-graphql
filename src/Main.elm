@@ -50,13 +50,21 @@ main =
 init : Flags -> ( Model, Effect )
 init () =
     ( initialModel
-    , graphqlEffect Query.hello (\_ -> GotStringResponse <| Ok "")
+    , batch
+        [ graphqlEffect Query.hello (\_ -> GotStringResponse <| Ok "")
+        ]
     )
 
 
 type Effect
-    = NoEffect
+    = Batch (List Effect)
     | GraphqlRequest (Decode.Decoder Msg) String
+    | NoEffect
+
+
+batch : List Effect -> Effect
+batch effects =
+    Batch effects
 
 
 graphqlEffect : SelectionSet decodesTo RootQuery -> (decodesTo -> Msg) -> Effect
@@ -72,6 +80,11 @@ graphqlEffect selectionSet toMsg =
 perform : Effect -> Cmd Msg
 perform effect =
     case effect of
+        Batch effects ->
+            effects
+                |> List.map perform
+                |> Cmd.batch
+
         NoEffect ->
             Cmd.none
 
