@@ -51,7 +51,7 @@ init : Flags -> ( Model, Effect )
 init () =
     ( initialModel
     , batch
-        [ graphqlEffect Query.hello (\_ -> GotStringResponse <| Ok "")
+        [ graphqlEffect Query.hello (\string -> GotStringResponse <| Ok string)
         ]
     )
 
