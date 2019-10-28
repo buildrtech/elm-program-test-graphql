@@ -1,6 +1,8 @@
 module MainTest exposing (all)
 
 import Expect
+import Http
+import Json.Decode as Decode
 import Main
 import ProgramTest exposing (ProgramTest)
 import SimulatedEffect.Cmd
@@ -28,7 +30,7 @@ all =
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql"
-                        "hi"
+                        """{ "data": { "hello3832528868": "hi" }}"""
                     |> ProgramTest.done
         ]
 
@@ -44,12 +46,28 @@ simulateEffects effect =
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 
-        Main.GraphqlRequest _ query ->
+        Main.GraphqlRequest decoder query ->
             SimulatedEffect.Http.post
                 { url = "https://elm-graphql.herokuapp.com/graphql"
                 , body = SimulatedEffect.Http.stringBody "application/json" query
-                , expect = SimulatedEffect.Http.expectString Main.GotStringResponse
+                , expect = SimulatedEffect.Http.expectString <| decoderToMsg decoder
                 }
+
+
+decoderToMsg : Decode.Decoder msg -> Result Http.Error String -> msg
+decoderToMsg decoder result =
+    case result of
+        Ok string ->
+            case string |> Decode.decodeString decoder of
+                Ok value ->
+                    value
+
+                Err error ->
+                    Debug.todo (error |> Decode.errorToString)
+
+        Err errorHttp ->
+            Debug.todo <|
+                Debug.toString errorHttp
 
 
 

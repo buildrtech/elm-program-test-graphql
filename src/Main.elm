@@ -110,7 +110,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Effect )
 update msg model =
-    case msg of
+    case Debug.log "MSG" msg of
         GotStringResponse response ->
             ( model, NoEffect )
 
