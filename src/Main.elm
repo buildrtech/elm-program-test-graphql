@@ -1,4 +1,4 @@
-module Main exposing (Effect(..), Model, Msg(..), init, main, subscriptions, update, view)
+module Main exposing (Effect(..), Model, Msg(..), decoderToMsg, init, main, subscriptions, update, view)
 
 import Browser
 import Dict exposing (Dict)
@@ -100,8 +100,24 @@ perform effect =
             Http.post
                 { url = "https://elm-graphql.herokuapp.com/graphql"
                 , body = Http.stringBody "application/json" query
-                , expect = Http.expectString GotStringResponse
+                , expect = Http.expectString <| decoderToMsg decoder
                 }
+
+
+decoderToMsg : Decode.Decoder msg -> Result Http.Error String -> msg
+decoderToMsg decoder result =
+    case result of
+        Ok string ->
+            case string |> Decode.decodeString decoder of
+                Ok value ->
+                    value
+
+                Err error ->
+                    Debug.todo (error |> Decode.errorToString)
+
+        Err errorHttp ->
+            Debug.todo <|
+                Debug.toString errorHttp
 
 
 

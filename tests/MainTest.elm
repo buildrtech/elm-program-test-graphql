@@ -54,24 +54,8 @@ simulateEffects effect =
             SimulatedEffect.Http.post
                 { url = "https://elm-graphql.herokuapp.com/graphql?index=" ++ String.fromInt index
                 , body = SimulatedEffect.Http.stringBody "application/json" query
-                , expect = SimulatedEffect.Http.expectString <| decoderToMsg decoder
+                , expect = SimulatedEffect.Http.expectString <| Main.decoderToMsg decoder
                 }
-
-
-decoderToMsg : Decode.Decoder msg -> Result Http.Error String -> msg
-decoderToMsg decoder result =
-    case result of
-        Ok string ->
-            case string |> Decode.decodeString decoder of
-                Ok value ->
-                    value
-
-                Err error ->
-                    Debug.todo (error |> Decode.errorToString)
-
-        Err errorHttp ->
-            Debug.todo <|
-                Debug.toString errorHttp
 
 
 
