@@ -1,4 +1,4 @@
-module Main exposing (Effect(..), Model, Msg(..), decoderToMsg, init, main, subscriptions, update, view)
+module Main exposing (Effect(..), Model, Msg(..), init, main, subscriptions, update, view)
 
 import Browser
 import Dict exposing (Dict)
@@ -54,18 +54,18 @@ init () =
         [ graphqlEffect
             0
             Query.hello
-            (\string -> GotStringResponse <| Ok string)
+            GotStringResponse
         , graphqlEffect
             1
             (Query.today |> SelectionSet.map String.length)
-            (\int -> GotIntResponse <| Ok int)
+            GotIntResponse
         ]
     )
 
 
 type Effect
     = Batch (List Effect)
-    | GraphqlRequest Int (Decode.Decoder Msg) String
+    | GraphqlRequest Int (Result Http.Error String -> Msg) String
     | NoEffect
 
 
@@ -74,14 +74,16 @@ batch effects =
     Batch effects
 
 
-graphqlEffect : Int -> SelectionSet decodesTo RootQuery -> (decodesTo -> Msg) -> Effect
+graphqlEffect : Int -> SelectionSet decodesTo RootQuery -> (RemoteData Http.Error decodesTo -> Msg) -> Effect
 graphqlEffect index selectionSet toMsg =
+    let
+        decoder =
+            selectionSet
+                |> Graphql.Document.decoder
+    in
     GraphqlRequest
         index
-        (selectionSet
-            |> Graphql.Document.decoder
-            |> Decode.map toMsg
-        )
+        (decoderToResultToMsg decoder toMsg)
         (Graphql.Document.serializeQuery selectionSet)
 
 
@@ -96,28 +98,29 @@ perform effect =
         NoEffect ->
             Cmd.none
 
-        GraphqlRequest index decoder query ->
+        GraphqlRequest index responseToMsg query ->
             Http.post
                 { url = "https://elm-graphql.herokuapp.com/graphql"
                 , body = Http.stringBody "application/json" query
-                , expect = Http.expectString <| decoderToMsg decoder
+                , expect = Http.expectString responseToMsg
                 }
 
 
-decoderToMsg : Decode.Decoder msg -> Result Http.Error String -> msg
-decoderToMsg decoder result =
-    case result of
-        Ok string ->
-            case string |> Decode.decodeString decoder of
-                Ok value ->
-                    value
-
-                Err error ->
-                    Debug.todo (error |> Decode.errorToString)
-
-        Err errorHttp ->
-            Debug.todo <|
-                Debug.toString errorHttp
+decoderToResultToMsg :
+    Decode.Decoder decodesTo
+    -> (RemoteData Http.Error decodesTo -> Msg)
+    -> Result Http.Error String
+    -> Msg
+decoderToResultToMsg decoder toMsg response =
+    response
+        |> Result.andThen
+            (\responseBody ->
+                responseBody
+                    |> Decode.decodeString decoder
+                    |> Result.mapError (\_ -> Http.BadBody "Failed to parse")
+            )
+        |> RemoteData.fromResult
+        |> toMsg
 
 
 
@@ -125,8 +128,8 @@ decoderToMsg decoder result =
 
 
 type Msg
-    = GotIntResponse (Result Http.Error Int)
-    | GotStringResponse (Result Http.Error String)
+    = GotIntResponse (RemoteData Http.Error Int)
+    | GotStringResponse (RemoteData Http.Error String)
 
 
 

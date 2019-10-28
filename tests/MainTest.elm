@@ -50,11 +50,11 @@ simulateEffects effect =
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 
-        Main.GraphqlRequest index decoder query ->
+        Main.GraphqlRequest index responseToMsg query ->
             SimulatedEffect.Http.post
                 { url = "https://elm-graphql.herokuapp.com/graphql?index=" ++ String.fromInt index
                 , body = SimulatedEffect.Http.stringBody "application/json" query
-                , expect = SimulatedEffect.Http.expectString <| Main.decoderToMsg decoder
+                , expect = SimulatedEffect.Http.expectString responseToMsg
                 }
 
 
