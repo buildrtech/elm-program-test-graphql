@@ -29,12 +29,12 @@ all =
                 start
                     |> ProgramTest.simulateHttpOk
                         "POST"
-                        "https://elm-graphql.herokuapp.com/graphql"
-                        """{ "data": { "today3832528868": "hi" }}"""
+                        "https://elm-graphql.herokuapp.com/graphql?index=0"
+                        """{ "data": { "hello3832528868": "hi" }}"""
                     |> ProgramTest.simulateHttpOk
                         "POST"
-                        "https://elm-graphql.herokuapp.com/graphql"
-                        """{ "data": { "hello3832528868": "hi" }}"""
+                        "https://elm-graphql.herokuapp.com/graphql?index=1"
+                        """{ "data": { "today3832528868": "hi" }}"""
                     |> ProgramTest.done
         ]
 
@@ -50,9 +50,9 @@ simulateEffects effect =
         Main.NoEffect ->
             SimulatedEffect.Cmd.none
 
-        Main.GraphqlRequest decoder query ->
+        Main.GraphqlRequest index decoder query ->
             SimulatedEffect.Http.post
-                { url = "https://elm-graphql.herokuapp.com/graphql"
+                { url = "https://elm-graphql.herokuapp.com/graphql?index=" ++ String.fromInt index
                 , body = SimulatedEffect.Http.stringBody "application/json" query
                 , expect = SimulatedEffect.Http.expectString <| decoderToMsg decoder
                 }

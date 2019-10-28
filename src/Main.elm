@@ -51,8 +51,12 @@ init : Flags -> ( Model, Effect )
 init () =
     ( initialModel
     , batch
-        [ graphqlEffect Query.hello (\string -> GotStringResponse <| Ok string)
+        [ graphqlEffect
+            0
+            Query.hello
+            (\string -> GotStringResponse <| Ok string)
         , graphqlEffect
+            1
             (Query.today |> SelectionSet.map String.length)
             (\int -> GotIntResponse <| Ok int)
         ]
@@ -61,7 +65,7 @@ init () =
 
 type Effect
     = Batch (List Effect)
-    | GraphqlRequest (Decode.Decoder Msg) String
+    | GraphqlRequest Int (Decode.Decoder Msg) String
     | NoEffect
 
 
@@ -70,9 +74,10 @@ batch effects =
     Batch effects
 
 
-graphqlEffect : SelectionSet decodesTo RootQuery -> (decodesTo -> Msg) -> Effect
-graphqlEffect selectionSet toMsg =
+graphqlEffect : Int -> SelectionSet decodesTo RootQuery -> (decodesTo -> Msg) -> Effect
+graphqlEffect index selectionSet toMsg =
     GraphqlRequest
+        index
         (selectionSet
             |> Graphql.Document.decoder
             |> Decode.map toMsg
@@ -91,9 +96,9 @@ perform effect =
         NoEffect ->
             Cmd.none
 
-        GraphqlRequest decoder query ->
+        GraphqlRequest index decoder query ->
             Http.post
-                { url = "https://elm-graphql.herokuapp.com"
+                { url = "https://elm-graphql.herokuapp.com/graphql"
                 , body = Http.stringBody "application/json" query
                 , expect = Http.expectString GotStringResponse
                 }
