@@ -8,6 +8,7 @@ import ProgramTest exposing (ProgramTest)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Http
 import Test exposing (..)
+import Test.Html.Selector exposing (text)
 
 
 start : ProgramTest Main.Model Main.Msg Main.Effect
@@ -30,12 +31,12 @@ all =
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=0"
-                        """{ "data": { "hello3832528868": "hi" }}"""
+                        """{ "data": { "hello3832528868": "example" }}"""
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=1"
-                        """{ "data": { "today3832528868": "hi" }}"""
-                    |> ProgramTest.done
+                        """{ "data": { "today3832528868": "example" }}"""
+                    |> ProgramTest.expectViewHas [ text "example", text "7" ]
         ]
 
 
