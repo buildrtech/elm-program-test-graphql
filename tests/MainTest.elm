@@ -57,13 +57,3 @@ simulateEffects effect =
                 , body = SimulatedEffect.Http.stringBody "application/json" query
                 , expect = SimulatedEffect.Http.expectString responseToMsg
                 }
-
-
-
---
--- Main.ChangeLight { url, onResult, decoder, body } ->
---     SimulatedEffect.Http.post
---         { url = url
---         , body = SimulatedEffect.Http.jsonBody body
---         , expect = SimulatedEffect.Http.expectJson onResult decoder
---         }
