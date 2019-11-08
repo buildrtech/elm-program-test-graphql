@@ -1,0 +1,3 @@
+[submodule "elm-program-test"]
+	path = elm-program-test
+	url = git@github.com:buildrtech/elm-program-test.git

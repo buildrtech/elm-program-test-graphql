@@ -1,6 +1,7 @@
 {
     "type": "application",
     "source-directories": [
+        "elm-program-test/src",
         "gen",
         "src"
     ],
@@ -30,7 +31,6 @@
     },
     "test-dependencies": {
         "direct": {
-            "avh4/elm-program-test": "3.1.0",
             "elm-explorations/test": "1.2.2"
         },
         "indirect": {
