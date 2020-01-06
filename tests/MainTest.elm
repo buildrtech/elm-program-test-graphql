@@ -2,6 +2,7 @@ module MainTest exposing (all)
 
 import Expect
 import Graphql.Document
+import Graphql.SelectionSet as SelectionSet
 import Http
 import Json.Decode as Decode
 import Main
@@ -30,14 +31,19 @@ all =
         [ test "string request" <|
             \() ->
                 start
-                    |> ProgramTest.ensureHttpRequest
-                        "POST"
-                        "https://elm-graphql.herokuapp.com/graphql?index=0"
-                        (.body >> Expect.equal (Swapi.Query.hello |> Graphql.Document.serializeQuery))
-                    |> ProgramTest.simulateHttpOk
-                        "POST"
-                        "https://elm-graphql.herokuapp.com/graphql?index=0"
-                        """{ "data": { "hello3832528868": "example" }}"""
+                    |> expectQuery "https://elm-graphql.herokuapp.com/graphql?index=0"
+                        (SelectionSet.map2 Tuple.pair
+                            Swapi.Query.hello
+                            Swapi.Query.today
+                        )
+                    --|> ProgramTest.ensureHttpRequest
+                    --    "POST"
+                    --    "https://elm-graphql.herokuapp.com/graphql?index=0"
+                    --    (.body >> Expect.equal (Swapi.Query.hello |> Graphql.Document.serializeQuery))
+                    --|> ProgramTest.simulateHttpOk
+                    --    "POST"
+                    --    "https://elm-graphql.herokuapp.com/graphql?index=0"
+                    --    (buildHelloResponse "example")
                     |> ProgramTest.ensureHttpRequest
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=1"
@@ -48,6 +54,27 @@ all =
                         """{ "data": { "today3832528868": "example" }}"""
                     |> ProgramTest.expectViewHas [ text "example", text "7" ]
         ]
+
+
+expectQuery url graphqlQuery program =
+    program
+        |> ProgramTest.ensureHttpRequest
+            "POST"
+            url
+            (.body >> Expect.equal (graphqlQuery |> Graphql.Document.serializeQuery))
+        |> ProgramTest.simulateHttpOk
+            "POST"
+            url
+            (buildHelloResponse "example")
+
+
+buildHelloResponse value =
+    """
+{ "data": { "today3832528868": "example",
+           "hello3832528868": "example"
+           }
+    }
+    """
 
 
 simulateEffects : Main.Effect -> ProgramTest.SimulatedEffect Main.Msg

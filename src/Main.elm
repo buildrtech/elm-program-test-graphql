@@ -19,7 +19,7 @@ import Url exposing (Url)
 
 
 type alias Model =
-    { stringResponse : RemoteData Http.Error String
+    { stringResponse : RemoteData Http.Error ( String, String )
     , intResponse : RemoteData Http.Error Int
     }
 
@@ -57,7 +57,10 @@ init () =
     , batch
         [ graphqlEffect
             0
-            Query.hello
+            (SelectionSet.map2 Tuple.pair
+                Query.hello
+                Query.today
+            )
             GotStringResponse
         , graphqlEffect
             1
@@ -133,7 +136,7 @@ buildResponseToMsg decoder toMsg response =
 
 type Msg
     = GotIntResponse (RemoteData Http.Error Int)
-    | GotStringResponse (RemoteData Http.Error String)
+    | GotStringResponse (RemoteData Http.Error ( String, String ))
 
 
 update : Msg -> Model -> ( Model, Effect )
@@ -163,16 +166,18 @@ view model =
     }
 
 
-viewForData : Int -> String -> Html Msg
-viewForData int string =
+viewForData : Int -> ( String, String ) -> Html Msg
+viewForData int ( string1, string2 ) =
     Html.div []
         [ Html.p []
             [ Html.text "int: "
             , Html.text <| String.fromInt int
             ]
         , Html.p []
-            [ Html.text "string: "
-            , Html.text string
+            [ Html.text "string1: "
+            , Html.text string1
+            , Html.text ", string2: "
+            , Html.text string2
             ]
         ]
 
