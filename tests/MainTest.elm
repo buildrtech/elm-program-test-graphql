@@ -6,6 +6,7 @@ import Graphql.SelectionSet as SelectionSet
 import Http
 import Json.Decode as Decode
 import Main
+import Mock
 import ProgramTest exposing (ProgramTest)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Http
@@ -31,7 +32,8 @@ all =
         [ test "string request" <|
             \() ->
                 start
-                    |> expectQuery "https://elm-graphql.herokuapp.com/graphql?index=0"
+                    |> expectQuery
+                        "https://elm-graphql.herokuapp.com/graphql?index=0"
                         (SelectionSet.map2 Tuple.pair
                             Swapi.Query.hello
                             Swapi.Query.today
@@ -56,6 +58,12 @@ all =
         ]
 
 
+mockApi =
+    Mock.init
+        |> Mock.hello "example"
+        |> Mock.today "example"
+
+
 expectQuery url graphqlQuery program =
     program
         |> ProgramTest.ensureHttpRequest
@@ -65,16 +73,15 @@ expectQuery url graphqlQuery program =
         |> ProgramTest.simulateHttpOk
             "POST"
             url
-            (buildHelloResponse "example")
+            (buildHelloResponse graphqlQuery "example")
 
 
-buildHelloResponse value =
-    """
-{ "data": { "today3832528868": "example",
-           "hello3832528868": "example"
-           }
-    }
-    """
+buildHelloResponse graphqlQuery value =
+    Mock.init
+        |> Mock.hello "example"
+        |> Mock.today "exampleToday"
+        |> Mock.response graphqlQuery
+        |> Result.withDefault ""
 
 
 simulateEffects : Main.Effect -> ProgramTest.SimulatedEffect Main.Msg
