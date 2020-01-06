@@ -1,3 +1,6 @@
 [submodule "elm-program-test"]
 	path = elm-program-test
 	url = git@github.com:buildrtech/elm-program-test.git
+[submodule "elm-graphql"]
+	path = elm-graphql
+	url = git@github.com:dillonkearns/elm-graphql.git
