@@ -1,12 +1,14 @@
 module MainTest exposing (all)
 
 import Expect
+import Graphql.Document
 import Http
 import Json.Decode as Decode
 import Main
 import ProgramTest exposing (ProgramTest)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Http
+import Swapi.Query
 import Test exposing (..)
 import Test.Html.Selector exposing (text)
 
@@ -31,7 +33,7 @@ all =
                     |> ProgramTest.ensureHttpRequest
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=0"
-                        (.body >> Expect.equal "query {\n  hello3832528868: hello\n}")
+                        (.body >> Expect.equal (Swapi.Query.hello |> Graphql.Document.serializeQuery))
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=0"
@@ -39,7 +41,7 @@ all =
                     |> ProgramTest.ensureHttpRequest
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=1"
-                        (.body >> Expect.equal "query {\n  today3832528868: today\n}")
+                        (.body >> Expect.equal (Swapi.Query.today |> Graphql.Document.serializeQuery))
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=1"
