@@ -28,10 +28,18 @@ all =
         [ test "string request" <|
             \() ->
                 start
+                    |> ProgramTest.ensureHttpRequest
+                        "POST"
+                        "https://elm-graphql.herokuapp.com/graphql?index=0"
+                        (.body >> Expect.equal "query {\n  hello3832528868: hello\n}")
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=0"
                         """{ "data": { "hello3832528868": "example" }}"""
+                    |> ProgramTest.ensureHttpRequest
+                        "POST"
+                        "https://elm-graphql.herokuapp.com/graphql?index=1"
+                        (.body >> Expect.equal "query {\n  today3832528868: today\n}")
                     |> ProgramTest.simulateHttpOk
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=1"
