@@ -45,7 +45,7 @@ all =
                     --|> ProgramTest.simulateHttpOk
                     --    "POST"
                     --    "https://elm-graphql.herokuapp.com/graphql?index=0"
-                    --    (buildHelloResponse "example")
+                    --    (buildHelloResponse "example"
                     |> ProgramTest.ensureHttpRequest
                         "POST"
                         "https://elm-graphql.herokuapp.com/graphql?index=1"

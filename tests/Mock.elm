@@ -1,5 +1,8 @@
 module Mock exposing (..)
 
+import Graphql.Document.Field
+import Graphql.RawField as RawField exposing (RawField)
+import Graphql.SelectionSet exposing (SelectionSet(..))
 import Json.Encode as Encode
 
 
@@ -35,26 +38,47 @@ response selectionSet (Mock mockFields) =
             { missingFields = [ "hello" ]
             }
 
-    else if List.length mockFields == 2 then
+    else
         Encode.object
             [ ( "data"
-              , Encode.object
-                    [ ( "hello3832528868", Encode.string "example" )
-                    , ( "today3832528868", Encode.string "todayExample" )
-                    ]
+              , mockedValues selectionSet (Mock mockFields)
               )
             ]
             |> Encode.encode 0
             |> Ok
 
-    else
-        Encode.object
-            [ ( "data"
-              , Encode.object [ ( "hello3832528868", Encode.string "example" ) ]
-              )
-            ]
-            |> Encode.encode 0
-            |> Ok
+
+mockedValues : SelectionSet a b -> Mock -> Encode.Value
+mockedValues (SelectionSet rawFields decoder) mock =
+    rawFields
+        |> Debug.log "rawFields"
+        |> List.map (mockedField mock)
+        |> Encode.object
+
+
+mockedField : Mock -> RawField -> ( String, Encode.Value )
+mockedField (Mock fields) rawField =
+    let
+        maybeValue =
+            fields
+                |> List.filter
+                    (\field ->
+                        case rawField of
+                            RawField.Leaf { fieldName } args ->
+                                field.name == fieldName
+
+                            _ ->
+                                Debug.todo ""
+                    )
+                |> List.head
+                |> Maybe.map .value
+    in
+    case maybeValue of
+        Just value ->
+            ( Graphql.Document.Field.hashedAliasName rawField, Encode.string value )
+
+        Nothing ->
+            Debug.todo ""
 
 
 type alias Error =

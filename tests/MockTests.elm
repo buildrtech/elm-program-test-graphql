@@ -1,9 +1,10 @@
 module MockTests exposing (suite)
 
 import Expect
+import Graphql.SelectionSet as SelectionSet
 import Mock
 import Swapi.Query
-import Test exposing (describe, test)
+import Test exposing (describe, only, test)
 
 
 suite =
@@ -27,7 +28,12 @@ suite =
                 Mock.init
                     |> Mock.hello "example"
                     |> Mock.today "todayExample"
-                    |> Mock.response Swapi.Query.hello
+                    |> Mock.response
+                        (SelectionSet.map2
+                            Tuple.pair
+                            Swapi.Query.hello
+                            Swapi.Query.today
+                        )
                     |> Expect.equal
                         (Ok
                             """{"data":{"hello3832528868":"example","today3832528868":"todayExample"}}"""
